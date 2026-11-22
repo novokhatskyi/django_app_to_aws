@@ -25,8 +25,13 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the Django project to the container
 COPY . /app/
 
+# Collect static files (CSS/JS for admin) into STATIC_ROOT
+RUN python manage.py collectstatic --noinput
+
 # Expose the application port
 EXPOSE 8000
 
 # Run Django’s development server
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+#CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+# Run the app with Gunicorn (production WSGI server)
+CMD ["gunicorn", "django_app.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "2", "--access-logfile", "-"]
